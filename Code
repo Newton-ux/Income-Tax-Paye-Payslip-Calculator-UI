@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Income Tax Calculator</title>
+    <style>
+        input {
+            display: block;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Income Tax Paye Payslip Calculator</h1>
+    <form id="tax-calculator">
+        <label for="monthly-income">Enter your monthly income: </label>
+        <input type="number" id="monthly-income" required>
+        
+        <label for="bonus-income">Enter your bonus income: </label>
+        <input type="number" id="bonus-income" required>
+        
+        <label for="nssf-pension">Enter your NSSF amount: </label>
+        <input type="number" id="nssf-pension" required>
+        
+        <label for="personal-pension">Enter your personal pension amount: </label>
+        <input type="number" id="personal-pension" required>
+        
+        <label for="nhif-health">Enter your NHIF amount: </label>
+        <input type="number" id="nhif-health" required>
+        
+        <label for="nita-employer">Enter your NITA amount: </label>
+        <input type="number" id="nita-employer" required>
+        
+        <label for="mortgage-interest">Enter your mortgage interest amount: </label>
+        <input type="number" id="mortgage-interest" required>
+        
+        <label for="insurance-premium">Enter your insurance premium amount - life/education/health with a maturity period of at least 10 years: </label>
+        <input type="number" id="insurance-premium" required>
+        
+        <label for="csr-deduction">Enter your csr deduction amount: </label>
+        <input type="number" id="csr-deduction" required>
+        
+        <label for="staffwelfare-deduction">Enter your staff welfare deduction amount: </label>
+        <input type="number" id="staffwelfare-deduction" required>
+        
+        <label for="bankcharges-deduction">Enter your bank charges deduction amount: </label>
+        <input type="number" id="bankcharges-deduction" required>
+        
+        <button type="submit">Calculate</button>
+    </form>
+    <div id="results"></div>
+    
+    <script>
+        document.getElementById('tax-calculator').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const getInputValue = id => parseInt(document.getElementById(id).value);
+            
+            const monthly_income = getInputValue('monthly-income');
+            const bonus_income = getInputValue('bonus-income');
+            const nssf_pension = getInputValue('nssf-pension');
+            const personal_pension = getInputValue('personal-pension');
+            const nhif_health = getInputValue('nhif-health');
+            const nita_employer = getInputValue('nita-employer');
+            const mortgage_interest = getInputValue('mortgage-interest');
+            const insurance_premium = getInputValue('insurance-premium');
+            const csr_deduction = getInputValue('csr-deduction');
+            const staffwelfare_deduction = getInputValue('staffwelfare-deduction');
+            const bankcharges_deduction = getInputValue('bankcharges-deduction');
+            
+            // ... All the calculations from the Python code, converted to JavaScript ...
+                        const gross_pay = monthly_income + bonus_income;
+
+            let insurance = 0;
+            if (insurance_premium > 0 && insurance_premium < 5000) {
+                insurance = insurance_premium * 0.15;
+            } else if (insurance_premium >= 5000) {
+                insurance = 5000;
+            }
+
+            const mortgage = mortgage_interest < 25000 ? mortgage_interest : 25000;
+
+            const pension = personal_pension < 20000 ? personal_pension : 20000;
+
+            const taxable_income = gross_pay - pension - nssf_pension - mortgage;
+
+            let tax = 0;
+            if (taxable_income > 0 && taxable_income <= 24000) {
+                tax = taxable_income * 0.1;
+            } else if (taxable_income > 24000 && taxable_income <= 32332) {
+                tax = 2400 + (taxable_income - 24000) * 0.25;
+            } else if (taxable_income > 32332) {
+                tax = 2400 + 2083.25 + (taxable_income - 32333) * 0.3;
+            }
+
+            const incometax_paye = tax - (2400 + 255 + insurance);
+
+            const deductions = nssf_pension + nhif_health + incometax_paye + pension + csr_deduction + staffwelfare_deduction + bankcharges_deduction;
+
+            const results = [
+                `Your gross pay is: KES ${gross_pay}`,
+                `Your taxable monthly income is: KES ${taxable_income}`,
+                `Your tax charge is: KES ${parseInt(tax)}`,
+                `Your monthly income tax PAYE is: KES ${parseInt(tax - 2400 - 255 - insurance)}`,
+                `The cost to your employer is: KES ${parseInt(monthly_income + nssf_pension + nita_employer)}`,
+                `Your net pay is: KES ${parseInt(gross_pay - deductions)}`,
+                `Your total deductions are: KES ${parseInt(deductions)}`,
+                `You are paying KES ${parseInt((incometax_paye) * 12)} of your income in taxes annually. This means that you work exclusively for the Government of Kenya for ${parseInt(((incometax_paye) * 12) / (gross_pay - deductions))} months every year.`,
+            ];
+
+            document.getElementById('results').innerHTML = results.map(result => `<p>${result}</p>`).join('');
+        });
+    </script>
+</body>
+</html>
